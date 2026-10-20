@@ -7,10 +7,13 @@ Press the shortcut once to jump to the previous tab, press it again to come back
 ## Features
 
 - One-key switching between your last two tabs
+- Rotate through your recently used tabs with a second shortcut
+- On-screen overlay while rotating that lists your recent tabs and highlights where you are
+- Configurable overlay (on/off) and rotation timeout (1–10 seconds, default 2)
 - Works across multiple browser windows
 - Skips tabs that have been closed
-- Customizable shortcut (default: **Alt+Q**)
-- Settings page that shows your current shortcut
+- Customizable shortcuts (defaults: **Alt+Q** to toggle, **Alt+Shift+Q** to rotate)
+- Settings page that shows your current shortcuts and holds the options
 - No data collected, no network requests
 
 Works in Chrome, Edge, Brave and other Chromium-based browsers.
@@ -28,17 +31,33 @@ Works in Chrome, Edge, Brave and other Chromium-based browsers.
 
 ## Usage
 
-1. Open two or more tabs.
-2. Press **Alt+Q** to switch to the previously active tab.
-3. Press it again to switch back.
+| Shortcut | Action |
+| --- | --- |
+| Alt+Q | Toggle between the two most recent tabs (A→B, then B→A) |
+| Alt+Shift+Q | Rotate through recent tabs: tap repeatedly to go further back |
 
-## Change the shortcut
+When rotating, each press moves one tab further back, wrapping around at the end. Pause for about two seconds (configurable) to stay on the tab you reached; the next press starts a fresh rotation from there. Tabs you pass through are not recorded, so only the one you land on becomes the most recent tab.
 
-Extensions can't set their own global shortcut from code, so the key is changed in the browser's shortcut settings:
+Browsers don't tell extensions when a modifier key like Alt is released, so a true hold-Alt-and-tap Alt+Tab experience isn't possible. Two shortcuts are used instead.
+
+## Settings
+
+Click the extension's toolbar icon to open its settings page (or right-click the icon and choose **Options**).
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| Show the tab overlay while rotating | On | Turn the overlay panel on or off. Rotation works either way. |
+| Rotation timeout | 2 seconds | How long the overlay stays on screen, and how long you have between presses to keep rotating (1–10 seconds). It also applies when the overlay is off. |
+
+Changes are saved automatically and apply on the next rotation. Settings sync with your browser profile.
+
+## Change the shortcuts
+
+Extensions can't set their own global shortcuts from code, so the keys are changed in the browser's shortcut settings:
 
 1. Click the extension's toolbar icon to open its settings page.
-2. Click **Change shortcut**. This opens `chrome://extensions/shortcuts`.
-3. Find **Previous Tab Switcher**, click the box next to **Switch to the previously active tab**, and press the keys you want (include Ctrl or Alt).
+2. Click **Change shortcuts**. This opens `chrome://extensions/shortcuts`.
+3. Find **Previous Tab Switcher**, click the box next to the action you want to change, and press the keys you want (include Ctrl or Alt).
 
 If Alt+Q does nothing, another extension or app may already use it. Pick a different combination there.
 
@@ -46,18 +65,28 @@ If Alt+Q does nothing, another extension or app may already use it. Pick a diffe
 
 The background service worker records every tab activation in a most-recent-first history (kept in `chrome.storage.session`, so it survives the worker being suspended). When the shortcut fires, it activates the most recent tab that isn't the current one and focuses its window. Closed tabs are removed from the history.
 
+Rotating takes a snapshot of that history on the first press and steps through it, ending after a pause.
+
+## Rotation overlay
+
+While rotating with Alt+Shift+Q, a small panel appears over the page you land on. It lists up to eight recent tabs with their icons and titles, highlights where you are, shows a count such as "2 of 5", and fades out after you pause. The overlay and its timeout are configurable in the [settings](#settings).
+
+It can't appear on pages the browser blocks extensions from, such as `chrome://` pages, the new tab page, the Web Store and PDFs. Rotation still works there, just without the panel.
+
 ## Permissions
 
 | Permission | Why |
 | --- | --- |
 | `tabs` | Find and activate the previous tab |
-| `storage` | Keep the tab history in session storage |
+| `storage` | Keep the tab history in session storage and save your settings |
+| `scripting` and access to all sites | Draw the rotation overlay on the page you land on. Nothing is read from or sent from pages. |
 
 ## Project structure
 
 ```
 manifest.json    Extension manifest (Manifest V3)
 background.js    Tab history and switching logic
+overlay.js       Rotation overlay injected into the tab you land on
 options.html     Settings page
 options.js       Settings page script
 icons/           Extension icons (16, 32, 48, 128 px)

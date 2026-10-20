@@ -1,6 +1,4 @@
-const keysEl = document.getElementById("keys");
-
-function renderShortcut(shortcut) {
+function renderShortcut(keysEl, shortcut) {
   keysEl.replaceChildren();
 
   if (!shortcut) {
@@ -26,10 +24,12 @@ function renderShortcut(shortcut) {
   });
 }
 
-async function showShortcut() {
+async function showShortcuts() {
   const commands = await chrome.commands.getAll();
-  const cmd = commands.find((c) => c.name === "switch-last-tab");
-  renderShortcut(cmd && cmd.shortcut);
+  document.querySelectorAll("[data-command]").forEach((el) => {
+    const cmd = commands.find((c) => c.name === el.dataset.command);
+    renderShortcut(el, cmd && cmd.shortcut);
+  });
 }
 
 document.getElementById("change").addEventListener("click", () => {
@@ -37,6 +37,43 @@ document.getElementById("change").addEventListener("click", () => {
   chrome.tabs.create({ url: `${scheme}://extensions/shortcuts` });
 });
 
-showShortcut();
-// The user edits the shortcut in another tab; refresh when they come back.
-window.addEventListener("focus", showShortcut);
+showShortcuts();
+// The user edits the shortcuts in another tab; refresh when they come back.
+window.addEventListener("focus", showShortcuts);
+
+const DEFAULT_TIMEOUT_MS = 2000;
+const timeoutInput = document.getElementById("timeout");
+const timeoutValue = document.getElementById("timeout-value");
+const overlayInput = document.getElementById("overlay");
+const savedEl = document.getElementById("saved");
+let savedTimer;
+
+function flashSaved() {
+  savedEl.textContent = "Saved";
+  clearTimeout(savedTimer);
+  savedTimer = setTimeout(() => (savedEl.textContent = ""), 1500);
+}
+
+function showTimeout() {
+  timeoutValue.textContent = `${timeoutInput.value} s`;
+}
+
+async function loadSettings() {
+  const { timeoutMs, showOverlay } = await chrome.storage.sync.get(["timeoutMs", "showOverlay"]);
+  timeoutInput.value = (Number(timeoutMs) || DEFAULT_TIMEOUT_MS) / 1000;
+  overlayInput.checked = showOverlay !== false;
+  showTimeout();
+}
+
+timeoutInput.addEventListener("input", showTimeout);
+timeoutInput.addEventListener("change", async () => {
+  await chrome.storage.sync.set({ timeoutMs: Number(timeoutInput.value) * 1000 });
+  flashSaved();
+});
+
+overlayInput.addEventListener("change", async () => {
+  await chrome.storage.sync.set({ showOverlay: overlayInput.checked });
+  flashSaved();
+});
+
+loadSettings();

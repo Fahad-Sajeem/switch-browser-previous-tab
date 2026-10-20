@@ -53,6 +53,7 @@
     header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
     .label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
     .keys { display: flex; align-items: center; gap: 8px; margin: 10px 0 20px; min-height: 52px; flex-wrap: wrap; }
+    .keys + .label { margin-top: 4px; }
     kbd {
       min-width: 52px; padding: 10px 16px; text-align: center; font: 600 16px ui-monospace, Consolas, monospace;
       background: var(--key-bg); border: 1px solid var(--key-border); border-radius: 10px;
@@ -66,6 +67,14 @@
     }
     button:hover { background: var(--accent-hover); }
     button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .setting { margin: 28px 0 0; padding-top: 22px; border-top: 1px solid var(--border); }
+    .toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; cursor: pointer; }
+    .toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .setting-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .setting-head output { font-weight: 600; color: var(--accent); }
+    .setting p { margin: 4px 0 12px; color: var(--muted); font-size: 13px; }
+    input[type=range] { width: 100%; accent-color: var(--accent); }
+    .saved { height: 16px; margin-top: 6px; font-size: 12px; color: var(--accent); }
     ol { list-style: none; counter-reset: s; margin: 28px 0 0; padding: 0; display: grid; gap: 12px; }
     li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; color: var(--muted); font-size: 14px; }
     li::before {
@@ -91,18 +100,35 @@
       </div>
     </header>
 
-    <div class="label">Current shortcut</div>
-    <div class="keys" id="keys" aria-live="polite"></div>
+    <div class="label">Switch to previous tab</div>
+    <div class="keys" data-command="switch-last-tab" aria-live="polite"></div>
 
-    <button id="change">Change shortcut</button>
+    <div class="label">Rotate through recent tabs</div>
+    <div class="keys" data-command="cycle-tabs" aria-live="polite"></div>
+
+    <button id="change">Change shortcuts</button>
+
+    <section class="setting">
+      <label class="toggle">
+        <input type="checkbox" id="overlay">
+        <span>Show the tab overlay while rotating</span>
+      </label>
+      <div class="setting-head">
+        <label class="label" for="timeout">Rotation timeout</label>
+        <output id="timeout-value" for="timeout"></output>
+      </div>
+      <p>How long the overlay stays on screen, and how long you have between presses to keep rotating. It applies even if the overlay is turned off.</p>
+      <input type="range" id="timeout" min="1" max="10" step="0.5">
+      <div class="saved" id="saved" aria-live="polite"></div>
+    </section>
 
     <ol>
-      <li><span>Click <b>Change shortcut</b> to open the browser's shortcut settings.</span></li>
-      <li><span>Find <b>Previous Tab Switcher</b> and click the box next to <b>Switch to the previously active tab</b>.</span></li>
+      <li><span>Click <b>Change shortcuts</b> to open the browser's shortcut settings.</span></li>
+      <li><span>Find <b>Previous Tab Switcher</b> and click the box next to the action you want to change.</span></li>
       <li><span>Press the key combination you want. Include <b>Ctrl</b> or <b>Alt</b>.</span></li>
     </ol>
 
-    <footer>Press the shortcut once to go to the previous tab, and again to come back.</footer>
+    <footer>Use the first shortcut to toggle between two tabs (A→B, then B→A). Tap the second one repeatedly to rotate through more tabs, then pause to land on one.</footer>
   </main>
   <script src="options.js"></script>
 </body>

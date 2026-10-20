@@ -3,7 +3,11 @@
   "name": "Previous Tab Switcher",
   "version": "1.0.0",
   "description": "Press a shortcut to toggle between your two most recently used tabs.",
-  "permissions": ["tabs", "storage"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting"
+  ],
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
@@ -30,6 +34,15 @@
         "default": "Alt+Q"
       },
       "description": "Switch to the previously active tab"
+    },
+    "cycle-tabs": {
+      "suggested_key": {
+        "default": "Alt+Shift+Q"
+      },
+      "description": "Cycle back through recently used tabs"
     }
-  }
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ]
 }
